@@ -1,0 +1,44 @@
+---
+drive_letter: 'C:'
+work_dir: '{{ drive_letter }}\ansible_workdir'
+
+microsip_url: 'https://www.microsip.org/download'
+microsip_portable: 'MicroSIP-Lite-3.20.3.zip'
+
+# For Windows Registry must be a full path, NOT from environment PATH like %ProgramFiles%
+microsip_app_dir: '{{ drive_letter }}\Program Files\MicroSIP'
+microsip_app_exe: 'microsip.exe'
+
+psexec_url: 'https://download.sysinternals.com/files/PSTools.zip'
+
+# Firewall Rules
+microsip_firewall_rules:
+  - name: 'MicroSIP (TCP-In)'
+    profiles: 'domain,private,public'
+    protocol: 'TCP'
+  - name: 'MicroSIP (UDP-In)'
+    profiles: 'domain,private,public'
+    protocol: 'UDP'
+
+# Registry Entry
+microsip_regedit_data: '"{{ microsip_app_dir }}\{{ microsip_app_exe }}"'
+# For starting minimized use this:
+# microsip_regedit_data: '"{{ microsip_app_dir }}\{{ microsip_app_exe }}" /minimized'
+
+# MicroSIP default settings
+##############################################
+microsip_settings_mainW:
+microsip_settings_mainH:
+
+accounts_default_server:
+accounts_default_domain:
+accounts_default_displayName:
+
+microsip_accounts:
+  - label:
+    server:
+    domain:
+    username:
+    password:
+    displayName:
+...

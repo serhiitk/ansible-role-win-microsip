@@ -1,0 +1,32 @@
+---
+- import_tasks: debug_tools.yml
+  tags:
+    - never
+
+- name: Check selected Local Drive existence
+  win_stat:
+    path: '{{ drive_letter }}\'
+  register: register_drive_info
+  tags:
+    - drive_info
+    - uninstall
+
+- debug:
+    var: register_drive_info.stat.exists
+  tags:
+    - drive_info
+    - never
+
+- block:
+
+    # Install and configure MicroSIP
+    - import_tasks: install_microsip.yml
+
+    # Uninstall MicroSIP using tag 'uninstall'
+    - import_tasks: uninstall_microsip.yml
+      tags:
+        - uninstall
+        - never
+
+  when: register_drive_info.stat.exists
+...

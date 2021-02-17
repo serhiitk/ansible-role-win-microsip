@@ -1,0 +1,32 @@
+---
+- name: Copy config file to MicroSIP directory
+  win_copy:
+    src: '{{ work_dir }}\microsip_config.ini'
+    dest: '{{ microsip_app_dir }}\microsip.ini'
+    remote_src: yes
+  listen: "config and restart MicroSIP"
+
+- name: Download PsExec
+  win_get_url:
+    url: '{{ psexec_url}}'
+    dest: '{{ work_dir }}'
+    force: no
+  listen: "config and restart MicroSIP"
+
+- name: Unzip PsExec
+  win_unzip:
+    src: '{{ work_dir }}\PsTools.zip'
+    dest: '{{ work_dir }}\PsTools'
+    creates: '{{ work_dir }}\PsTools\PsExec.exe'
+  listen: "config and restart MicroSIP"
+
+- name: Run App with PsExec
+  win_psexec:
+    command: 'cmd.exe /c start "" "{{ microsip_app_dir }}\{{ microsip_app_exe }}"'
+    executable: '{{ work_dir }}\PsTools\PsExec.exe'
+    interactive: yes
+    nobanner: yes
+    session: 1
+    system: yes
+  listen: "config and restart MicroSIP"
+...

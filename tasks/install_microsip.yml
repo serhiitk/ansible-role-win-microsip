@@ -1,0 +1,53 @@
+---
+- name: Ensure work directory for Ansible files exist
+  win_file:
+    path: '{{ work_dir }}'
+    state: directory
+
+- name: Download MicroSIP Portable
+  win_get_url:
+    url: '{{ microsip_url }}/{{ microsip_portable }}'
+    dest: '{{ work_dir }}'
+    force: no
+
+- name: Unzip MicroSIP Portable
+  win_unzip:
+    src: '{{ work_dir }}\{{ microsip_portable }}'
+    dest: '{{ microsip_app_dir }}'
+    creates: '{{ microsip_app_dir }}\{{ microsip_app_exe }}'
+
+- name: Create config file from a Jinja2 template
+  win_template:
+    src: microsip.ini.j2
+    dest: '{{ work_dir }}\microsip_config.ini'
+  notify: "config and restart MicroSIP"
+
+- name: Add Firewall rules for MicroSIP
+  win_firewall_rule:
+    name: '{{ item.name }}'
+    action: allow
+    direction: in
+    enabled: yes
+    profiles: '{{ item.profiles }}'
+    program: '{{ microsip_app_dir }}\{{ microsip_app_exe }}'
+    protocol: '{{ item.protocol }}'
+    state: present
+  loop: '{{ microsip_firewall_rules }}'
+
+- name: Ensure MicroSIP is run at system startup (regedit)
+  win_regedit:
+    path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Run
+    name: MicroSIP
+    data: '{{ microsip_regedit_data }}'
+    state: present
+    type: string
+  tags:
+    - startup
+
+- name: Create MicroSIP shortcut on the Desktop
+  win_shortcut:
+    src: '{{ microsip_app_dir }}\{{ microsip_app_exe }}'
+    dest: '%UserProfile%\Desktop\MicroSIP.lnk'
+  tags:
+    - shortcut
+...

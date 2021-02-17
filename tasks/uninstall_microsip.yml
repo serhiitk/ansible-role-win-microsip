@@ -1,0 +1,41 @@
+---
+- name: Stop MicroSIP processes
+  win_command: 'cmd.exe /c "taskkill /f /im {{ item }}"'
+  failed_when: register_taskkill.rc not in [0, 128]
+  changed_when: register_taskkill.rc == 0
+  # ignore_errors: yes
+  register: register_taskkill
+  loop:
+    - 'microsip*'
+    - 'psexe*'
+
+# - debug:
+#     var: register_taskkill
+
+- name: Remove application and work directories
+  win_file:
+    path: '{{ item }}'
+    state: absent
+  # If a directory is being used by another process it causes an error
+  ignore_errors: yes
+  loop:
+    - '{{ work_dir }}'
+    - '{{ microsip_app_dir }}'
+
+- name: Remove Firewall rules for MicroSIP
+  win_firewall_rule:
+    name: '{{ item.name }}'
+    state: absent
+  loop: '{{ microsip_firewall_rules }}'
+
+- name: Remove entry MicroSIP from registry
+  win_regedit:
+    path: HKCU:\Software\Microsoft\Windows\CurrentVersion\Run
+    name: MicroSIP
+    state: absent
+
+- name: Remove MicroSIP shortcut on the desktop
+  win_shortcut:
+    dest: '%UserProfile%\Desktop\MicroSIP.lnk'
+    state: absent
+...

@@ -1,0 +1,24 @@
+---
+- name: Ping Windows hosts
+  win_ping:
+  tags:
+    - ping
+
+- name: Check generated template
+  debug:
+    msg: "{{ lookup('template', 'microsip.ini.j2') }}"
+  tags:
+    - show_template
+
+- name: Get whoami information
+  win_whoami:
+    become: yes
+  register: register_whoami
+  tags:
+    - whoami
+
+- debug:
+    var: register_whoami
+  tags:
+    - whoami
+...
